@@ -7,52 +7,47 @@
 MODEL_CAPABILITIES = {
     "openrouter": {
         "tool_calling_models": [
+            # Moonshot系列 - 支持工具调用
+            "moonshotai/kimi-k2:free",
+
             # Qwen系列 - 支持工具调用
-            "qwen/qwen3-30b-a3b:free",
-            "qwen/qwen3-14b:free", 
-            "qwen/qwen2.5-72b-instruct",
-            "qwen/qwen2.5-14b-instruct",
-            
-            # DeepSeek系列 - 支持工具调用
-            "deepseek/deepseek-r1-distill-qwen-14b:free",
-            "deepseek/deepseek-chat",
-            "deepseek/deepseek-coder",
-            
+            "qwen/qwen3-235b-a22b:free",
+
+            # Mistral系列 - 支持工具调用
+            "mistralai/mistral-small-3.2-24b-instruct:free",
+            "mistralai/devstral-small-2505:free",
+            "mistralai/mistral-small-3.1-24b-instruct:free",
+            "mistralai/mistral-7b-instruct:free",
+
             # Meta Llama系列 - 支持工具调用
-            "meta-llama/llama-3.1-70b-instruct",
-            "meta-llama/llama-3.1-8b-instruct",
-            "meta-llama/llama-3.2-11b-vision-instruct",
-            
-            # Anthropic Claude系列 - 支持工具调用
-            "anthropic/claude-3.5-sonnet",
-            "anthropic/claude-3-haiku",
-            
-            # OpenAI系列 - 支持工具调用
-            "openai/gpt-4o",
-            "openai/gpt-4o-mini",
-            "openai/gpt-3.5-turbo",
-            
+            "meta-llama/llama-3.3-70b-instruct:free",
+
+            # OpenRouter系列 - 支持工具调用
+            "openrouter/cypher-alpha:free",
+
             # Google系列 - 支持工具调用
-            "google/gemini-pro-1.5",
-            "google/gemini-flash-1.5",
+            "google/gemini-2.5-pro-exp-03-25",
+            "google/gemini-2.0-flash-exp:free",
+
+            # DeepSeek系列 - 支持工具调用
+            "deepseek/deepseek-chat-v3-0324:free",
         ],
         "non_tool_calling_models": [
             # 一些基础模型不支持工具调用
             "meta-llama/llama-2-7b-chat",
-            "mistralai/mistral-7b-instruct",
         ],
         "recommended_configs": {
             "production": {
-                "deep_think_llm": "qwen/qwen3-30b-a3b:free",
-                "quick_think_llm": "qwen/qwen3-14b:free"
+                "deep_think_llm": "qwen/qwen3-235b-a22b:free",
+                "quick_think_llm": "moonshotai/kimi-k2:free"
             },
             "development": {
-                "deep_think_llm": "deepseek/deepseek-r1-distill-qwen-14b:free",
-                "quick_think_llm": "qwen/qwen3-14b:free"
+                "deep_think_llm": "deepseek/deepseek-chat-v3-0324:free",
+                "quick_think_llm": "mistralai/mistral-small-3.2-24b-instruct:free"
             },
             "high_performance": {
-                "deep_think_llm": "anthropic/claude-3.5-sonnet",
-                "quick_think_llm": "openai/gpt-4o-mini"
+                "deep_think_llm": "google/gemini-2.5-pro-exp-03-25",
+                "quick_think_llm": "meta-llama/llama-3.3-70b-instruct:free"
             }
         }
     },
@@ -199,9 +194,16 @@ def validate_model_config(provider: str, deep_think_llm: str, quick_think_llm: s
 # 免费模型推荐（支持工具调用）
 FREE_TOOL_CALLING_MODELS = {
     "openrouter": [
-        "qwen/qwen3-30b-a3b:free",
-        "qwen/qwen3-14b:free",
-        "deepseek/deepseek-r1-distill-qwen-14b:free",
+        "moonshotai/kimi-k2:free",
+        "qwen/qwen3-235b-a22b:free",
+        "mistralai/mistral-small-3.2-24b-instruct:free",
+        "mistralai/devstral-small-2505:free",
+        "mistralai/mistral-small-3.1-24b-instruct:free",
+        "meta-llama/llama-3.3-70b-instruct:free",
+        "mistralai/mistral-7b-instruct:free",
+        "openrouter/cypher-alpha:free",
+        "google/gemini-2.0-flash-exp:free",
+        "deepseek/deepseek-chat-v3-0324:free",
     ],
     "groq": [
         "llama3-groq-70b-8192-tool-use-preview",

@@ -18,6 +18,18 @@ from . import googlenews_utils
 from . import yfin_utils
 from . import reddit_utils
 
+# 导入新的A股数据源
+try:
+    from .china_stock_data_sources import (
+        china_stock_manager,
+        get_china_stock_data,
+        get_china_company_info
+    )
+    CHINA_STOCK_SOURCES_AVAILABLE = True
+except ImportError as e:
+    logger.warning(f"China stock data sources not available: {e}")
+    CHINA_STOCK_SOURCES_AVAILABLE = False
+
 logger = logging.getLogger(__name__)
 
 class EnhancedDataSourceManager(DataSourceManager):
@@ -31,10 +43,10 @@ class EnhancedDataSourceManager(DataSourceManager):
         # 数据源优先级配置
         self.data_source_priority = {
             "cn_market": {
-                "stock_data": ["akshare", "yfin"],
-                "company_info": ["akshare"],
+                "stock_data": ["china_enhanced", "akshare", "yfin"],  # 新增china_enhanced作为首选
+                "company_info": ["china_enhanced", "akshare"],  # 新增china_enhanced
                 "news": ["akshare", "googlenews"],
-                "financials": ["akshare", "finnhub"],
+                "financials": ["china_enhanced", "akshare", "finnhub"],  # 新增china_enhanced
                 "social_sentiment": ["reddit", "googlenews"]
             },
             "us_market": {
@@ -119,9 +131,12 @@ class EnhancedDataSourceManager(DataSourceManager):
         for source in data_sources:
             try:
                 logger.info(f"Trying {source} for stock data: {symbol}")
-                
+
                 if source == "akshare" and market == "cn_market":
                     df = akshare_utils.get_stock_zh_a_daily(symbol, start_date, end_date)
+                elif source == "china_enhanced" and market == "cn_market" and CHINA_STOCK_SOURCES_AVAILABLE:
+                    # 使用新的A股数据源（JQData、Tushare、Alltick）
+                    df = get_china_stock_data(symbol, start_date, end_date)
                 elif source == "yfin":
                     df = yfin_utils.get_stock_data(symbol, start_date, end_date)
                 elif source == "finnhub":
@@ -163,19 +178,27 @@ class EnhancedDataSourceManager(DataSourceManager):
         for source in data_sources:
             try:
                 logger.info(f"Trying {source} for company info: {symbol}")
-                
-                if source == "akshare" and market == "cn_market":
+
+                if source == "china_enhanced" and market == "cn_market" and CHINA_STOCK_SOURCES_AVAILABLE:
+                    # 使用新的A股数据源获取公司信息
+                    info = get_china_company_info(symbol)
+                    if info is not None:
+                        if use_cache:
+                            self._save_to_cache(cache_path, info)
+                        return info
+
+                elif source == "akshare" and market == "cn_market":
                     df = akshare_utils.get_stock_zh_a_info(symbol)
                     if df is not None and not df.empty:
                         info = df.iloc[0].to_dict()
                         if use_cache:
                             self._save_to_cache(cache_path, info)
                         return info
-                
+
                 elif source == "finnhub":
                     # 这里可以添加finnhub的公司信息获取
                     pass
-                    
+
             except Exception as e:
                 logger.warning(f"Failed to get company info from {source}: {e}")
                 continue
