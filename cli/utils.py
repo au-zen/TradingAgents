@@ -125,7 +125,11 @@ def select_research_depth() -> int:
 def select_shallow_thinking_agent(provider) -> str:
     """Select shallow thinking llm engine using an interactive selection."""
 
+    # 提取提供商名称（去除描述文字）
+    provider_name = provider.lower().split()[0] if provider else ""
+
     # Define shallow thinking llm engine options with their corresponding model names
+    # 标注支持工具调用的模型
     SHALLOW_AGENT_OPTIONS = {
         "openai": [
             ("GPT-4o-mini - Fast and efficient for quick tasks", "gpt-4o-mini"),
@@ -145,13 +149,28 @@ def select_shallow_thinking_agent(provider) -> str:
             ("Gemini 2.5 Flash - Adaptive thinking, cost efficiency", "gemini-2.5-flash-preview-05-20"),
         ],
         "openrouter": [
-            ("Meta: Llama 4 Scout", "meta-llama/llama-4-scout:free"),
-            ("Meta: Llama 3.3 8B Instruct - A lightweight and ultra-fast variant of Llama 3.3 70B", "meta-llama/llama-3.3-8b-instruct:free"),
-            ("google/gemini-2.0-flash-exp:free - Gemini Flash 2.0 offers a significantly faster time to first token", "google/gemini-2.0-flash-exp:free"),
+           ("Qwen3-14B (免费, 支持工具调用)", "qwen/qwen3-14b:free"),
+           ("DeepSeek R1 Distill Qwen-14B (免费, 支持工具调用)", "deepseek/deepseek-r1-distill-qwen-14b:free"),
+           ("Google Gemini Flash 1.5 (免费)", "google/gemini-flash-1.5"),
+           ("Qwen2.5-14B Instruct (支持工具调用)", "qwen/qwen2.5-14b-instruct"),
+           ("Meta Llama 3.1-8B Instruct (支持工具调用)", "meta-llama/llama-3.1-8b-instruct"),
+           ("Mistral 7B Instruct (免费)", "mistralai/mistral-7b-instruct:free"),
+        ],
+        "groq": [
+           ("Llama3 Groq 8B Tool Use (免费, 支持工具调用)", "llama3-groq-8b-8192-tool-use-preview"),
+           ("Llama3.1-8B Instant (免费, 支持工具调用)", "llama-3.1-8b-instant"),
+           ("Mixtral 8x7B (免费, 支持工具调用)", "mixtral-8x7b-32768"),
+        ],
+        "together": [
+           ("Qwen2.5-7B Instruct (免费, 支持工具调用)", "Qwen/Qwen2.5-7B-Instruct"),
+           ("Meta Llama 3-8B Chat (免费, 支持工具调用)", "meta-llama/Llama-3-8b-chat-hf"),
         ],
         "ollama": [
-            ("llama3.1 local", "llama3.1"),
-            ("llama3.2 local", "llama3.2"),
+            ("qwen3:latest (local, 8B, multilingual, fast)", "qwen3:latest"),
+            ("llama3.2:latest (local, 3.2B, compact)", "llama3.2:latest"),
+            ("llama3.1:latest (local, 8B, general)", "llama3.1:latest"),
+            ("mistral:latest (local, 7B, efficient)", "mistral:latest"),
+            ("llama2:latest (local, 7B, legacy)", "llama2:latest"),
         ]
     }
 
@@ -159,7 +178,9 @@ def select_shallow_thinking_agent(provider) -> str:
         "Select Your [Quick-Thinking LLM Engine]:",
         choices=[
             questionary.Choice(display, value=value)
-            for display, value in SHALLOW_AGENT_OPTIONS[provider.lower()]
+            for display, value in SHALLOW_AGENT_OPTIONS.get(provider_name, [])
+        ] if SHALLOW_AGENT_OPTIONS.get(provider_name) else [
+            questionary.Choice("No models available for this provider", value="")
         ],
         instruction="\n- Use arrow keys to navigate\n- Press Enter to select",
         style=questionary.Style(
@@ -183,6 +204,9 @@ def select_shallow_thinking_agent(provider) -> str:
 def select_deep_thinking_agent(provider) -> str:
     """Select deep thinking llm engine using an interactive selection."""
 
+    # 提取提供商名称（去除描述文字）
+    provider_name = provider.lower().split()[0] if provider else ""
+
     # Define deep thinking llm engine options with their corresponding model names
     DEEP_AGENT_OPTIONS = {
         "openai": [
@@ -199,7 +223,7 @@ def select_deep_thinking_agent(provider) -> str:
             ("Claude Sonnet 3.5 - Highly capable standard model", "claude-3-5-sonnet-latest"),
             ("Claude Sonnet 3.7 - Exceptional hybrid reasoning and agentic capabilities", "claude-3-7-sonnet-latest"),
             ("Claude Sonnet 4 - High performance and excellent reasoning", "claude-sonnet-4-0"),
-            ("Claude Opus 4 - Most powerful Anthropic model", "	claude-opus-4-0"),
+            ("Claude Opus 4 - Most powerful Anthropic model", "\tclaude-opus-4-0"),
         ],
         "google": [
             ("Gemini 2.0 Flash-Lite - Cost efficiency and low latency", "gemini-2.0-flash-lite"),
@@ -208,12 +232,29 @@ def select_deep_thinking_agent(provider) -> str:
             ("Gemini 2.5 Pro", "gemini-2.5-pro-preview-06-05"),
         ],
         "openrouter": [
-            ("DeepSeek V3 - a 685B-parameter, mixture-of-experts model", "deepseek/deepseek-chat-v3-0324:free"),
-            ("Deepseek - latest iteration of the flagship chat model family from the DeepSeek team.", "deepseek/deepseek-chat-v3-0324:free"),
+            ("Qwen3-30B-A3B (免费, 支持工具调用)", "qwen/qwen3-30b-a3b:free"),
+            ("DeepSeek R1 Distill Qwen-14B (免费, 支持工具调用)", "deepseek/deepseek-r1-distill-qwen-14b:free"),
+            ("Qwen2.5-72B Instruct (支持工具调用)", "qwen/qwen2.5-72b-instruct"),
+            ("Claude 3.5 Sonnet (支持工具调用)", "anthropic/claude-3.5-sonnet"),
+            ("Meta Llama 3.1-70B Instruct (支持工具调用)", "meta-llama/llama-3.1-70b-instruct"),
+            ("Google Gemini Flash 1.5 (免费)", "google/gemini-flash-1.5"),
+        ],
+        "groq": [
+            ("Llama3 Groq 70B Tool Use (免费, 支持工具调用)", "llama3-groq-70b-8192-tool-use-preview"),
+            ("Llama3.1-70B Versatile (免费, 支持工具调用)", "llama-3.1-70b-versatile"),
+            ("Mixtral 8x7B (免费, 支持工具调用)", "mixtral-8x7b-32768"),
+        ],
+        "together": [
+            ("Qwen2-72B Instruct (免费, 支持工具调用)", "Qwen/Qwen2-72B-Instruct"),
+            ("Meta Llama 3-70B Chat (免费, 支持工具调用)", "meta-llama/Llama-3-70b-chat-hf"),
+            ("Mixtral 8x7B Instruct (支持工具调用)", "mistralai/Mixtral-8x7B-Instruct-v0.1"),
         ],
         "ollama": [
-            ("llama3.1 local", "llama3.1"),
-            ("qwen3", "qwen3"),
+            ("qwen3:latest (local, 8B, multilingual, deep)", "qwen3:latest"),
+            ("llama3.1:latest (local, 8B, general)", "llama3.1:latest"),
+            ("llama3.2:latest (local, 3.2B, compact)", "llama3.2:latest"),
+            ("mistral:latest (local, 7B, efficient)", "mistral:latest"),
+            ("deepseek-coder-v2:latest (local, 15.7B, code)", "deepseek-coder-v2:latest"),
         ]
     }
     
@@ -221,7 +262,9 @@ def select_deep_thinking_agent(provider) -> str:
         "Select Your [Deep-Thinking LLM Engine]:",
         choices=[
             questionary.Choice(display, value=value)
-            for display, value in DEEP_AGENT_OPTIONS[provider.lower()]
+            for display, value in DEEP_AGENT_OPTIONS.get(provider_name, [])
+        ] if DEEP_AGENT_OPTIONS.get(provider_name) else [
+            questionary.Choice("No models available for this provider", value="")
         ],
         instruction="\n- Use arrow keys to navigate\n- Press Enter to select",
         style=questionary.Style(
@@ -241,13 +284,15 @@ def select_deep_thinking_agent(provider) -> str:
 
 def select_llm_provider() -> tuple[str, str]:
     """Select the OpenAI api url using interactive selection."""
-    # Define OpenAI api options with their corresponding endpoints
+    # Define LLM provider options with their corresponding endpoints
     BASE_URLS = [
         ("OpenAI", "https://api.openai.com/v1"),
         ("Anthropic", "https://api.anthropic.com/"),
         ("Google", "https://generativelanguage.googleapis.com/v1"),
-        ("Openrouter", "https://openrouter.ai/api/v1"),
-        ("Ollama", "http://localhost:11434/v1"),        
+        ("Openrouter (推荐, 免费额度大)", "https://openrouter.ai/api/v1"),
+        ("Groq (高速, 免费)", "https://api.groq.com/openai/v1"),
+        ("Together AI (开源模型丰富)", "https://api.together.xyz/v1"),
+        ("Ollama (本地, 完全免费)", "http://localhost:11434/v1"),
     ]
     
     choice = questionary.select(

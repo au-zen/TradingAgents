@@ -48,7 +48,8 @@ class RiskDebateState(TypedDict):
 
 
 class AgentState(MessagesState):
-    company_of_interest: Annotated[str, "Company that we are interested in trading"]
+    company_of_interest: Annotated[str, "Ticker symbol of the company we are interested in trading"]
+    company_name: Annotated[str, "Actual company name (e.g., '昭衍新药' for '603127.SH')"]
     trade_date: Annotated[str, "What date we are trading at"]
 
     sender: Annotated[str, "Agent that sent this message"]

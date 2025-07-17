@@ -58,17 +58,66 @@ class TradingAgentsGraph:
         )
 
         # Initialize LLMs
-        if self.config["llm_provider"].lower() == "openai" or self.config["llm_provider"] == "ollama" or self.config["llm_provider"] == "openrouter":
-            self.deep_thinking_llm = ChatOpenAI(model=self.config["deep_think_llm"], base_url=self.config["backend_url"])
-            self.quick_thinking_llm = ChatOpenAI(model=self.config["quick_think_llm"], base_url=self.config["backend_url"])
-        elif self.config["llm_provider"].lower() == "anthropic":
+        # 提取提供商名称（去除描述文字）
+        provider_name = self.config["llm_provider"].lower().split()[0] if self.config["llm_provider"] else ""
+
+        if provider_name == "openai" or provider_name == "ollama" or provider_name == "openrouter":
+            # Get the appropriate API key based on provider
+            if provider_name == "ollama":
+                api_key = "ollama"  # Dummy key for Ollama
+            elif provider_name == "openrouter":
+                api_key = self.config["openrouter_api_key"]
+            else:  # openai
+                api_key = os.getenv("OPENAI_API_KEY")
+
+            self.deep_thinking_llm = ChatOpenAI(
+                model=self.config["deep_think_llm"],
+                base_url=self.config["backend_url"],
+                api_key=api_key
+            )
+            self.quick_thinking_llm = ChatOpenAI(
+                model=self.config["quick_think_llm"],
+                base_url=self.config["backend_url"],
+                api_key=api_key
+            )
+        elif provider_name == "groq":
+            # Groq uses OpenAI-compatible API
+            self.deep_thinking_llm = ChatOpenAI(
+                model=self.config["deep_think_llm"],
+                base_url=self.config["api_endpoints"]["groq"],
+                api_key=self.config["groq_api_key"]
+            )
+            self.quick_thinking_llm = ChatOpenAI(
+                model=self.config["quick_think_llm"],
+                base_url=self.config["api_endpoints"]["groq"],
+                api_key=self.config["groq_api_key"]
+            )
+        elif provider_name == "together":
+            # Together AI uses OpenAI-compatible API
+            self.deep_thinking_llm = ChatOpenAI(
+                model=self.config["deep_think_llm"],
+                base_url=self.config["api_endpoints"]["together"],
+                api_key=self.config["together_api_key"]
+            )
+            self.quick_thinking_llm = ChatOpenAI(
+                model=self.config["quick_think_llm"],
+                base_url=self.config["api_endpoints"]["together"],
+                api_key=self.config["together_api_key"]
+            )
+        elif provider_name == "anthropic":
             self.deep_thinking_llm = ChatAnthropic(model=self.config["deep_think_llm"], base_url=self.config["backend_url"])
             self.quick_thinking_llm = ChatAnthropic(model=self.config["quick_think_llm"], base_url=self.config["backend_url"])
-        elif self.config["llm_provider"].lower() == "google":
-            self.deep_thinking_llm = ChatGoogleGenerativeAI(model=self.config["deep_think_llm"])
-            self.quick_thinking_llm = ChatGoogleGenerativeAI(model=self.config["quick_think_llm"])
+        elif provider_name == "google":
+            self.deep_thinking_llm = ChatGoogleGenerativeAI(
+                model=self.config["deep_think_llm"],
+                google_api_key=self.config["google_api_key"]
+            )
+            self.quick_thinking_llm = ChatGoogleGenerativeAI(
+                model=self.config["quick_think_llm"],
+                google_api_key=self.config["google_api_key"]
+            )
         else:
-            raise ValueError(f"Unsupported LLM provider: {self.config['llm_provider']}")
+            raise ValueError(f"Unsupported LLM provider: {provider_name} (from: {self.config['llm_provider']})")
         
         self.toolkit = Toolkit(config=self.config)
 
@@ -114,12 +163,8 @@ class TradingAgentsGraph:
         return {
             "market": ToolNode(
                 [
-                    # online tools
-                    self.toolkit.get_YFin_data_online,
-                    self.toolkit.get_stockstats_indicators_report_online,
-                    # offline tools
-                    self.toolkit.get_YFin_data,
-                    self.toolkit.get_stockstats_indicators_report,
+                    self.toolkit.get_stock_data,
+                    self.toolkit.get_stock_indicators,
                 ]
             ),
             "social": ToolNode(
@@ -143,7 +188,7 @@ class TradingAgentsGraph:
             "fundamentals": ToolNode(
                 [
                     # online tools
-                    self.toolkit.get_fundamentals_openai,
+                    self.toolkit.get_fundamentals,
                     # offline tools
                     self.toolkit.get_finnhub_company_insider_sentiment,
                     self.toolkit.get_finnhub_company_insider_transactions,

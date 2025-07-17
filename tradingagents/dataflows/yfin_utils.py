@@ -13,9 +13,9 @@ def init_ticker(func: Callable) -> Callable:
     """Decorator to initialize yf.Ticker and pass it to the function."""
 
     @wraps(func)
-    def wrapper(symbol: Annotated[str, "ticker symbol"], *args, **kwargs) -> Any:
+    def wrapper(self, symbol: Annotated[str, "ticker symbol"], *args, **kwargs) -> Any:
         ticker = yf.Ticker(symbol)
-        return func(ticker, *args, **kwargs)
+        return func(self, ticker, *args, **kwargs)
 
     return wrapper
 
@@ -24,7 +24,8 @@ def init_ticker(func: Callable) -> Callable:
 class YFinanceUtils:
 
     def get_stock_data(
-        symbol: Annotated[str, "ticker symbol"],
+        self,
+        ticker,  # This is now a yf.Ticker object from the decorator
         start_date: Annotated[
             str, "start date for retrieving stock price data, YYYY-mm-dd"
         ],
@@ -34,7 +35,6 @@ class YFinanceUtils:
         save_path: SavePathType = None,
     ) -> DataFrame:
         """retrieve stock price data for designated ticker symbol"""
-        ticker = symbol
         # add one day to the end_date so that the data range is inclusive
         end_date = pd.to_datetime(end_date) + pd.DateOffset(days=1)
         end_date = end_date.strftime("%Y-%m-%d")
@@ -43,19 +43,19 @@ class YFinanceUtils:
         return stock_data
 
     def get_stock_info(
-        symbol: Annotated[str, "ticker symbol"],
+        self,
+        ticker,  # This is now a yf.Ticker object from the decorator
     ) -> dict:
         """Fetches and returns latest stock information."""
-        ticker = symbol
         stock_info = ticker.info
         return stock_info
 
     def get_company_info(
-        symbol: Annotated[str, "ticker symbol"],
+        self,
+        ticker,  # This is now a yf.Ticker object from the decorator
         save_path: Optional[str] = None,
     ) -> DataFrame:
         """Fetches and returns company information as a DataFrame."""
-        ticker = symbol
         info = ticker.info
         company_info = {
             "Company Name": info.get("shortName", "N/A"),
@@ -71,38 +71,34 @@ class YFinanceUtils:
         return company_info_df
 
     def get_stock_dividends(
-        symbol: Annotated[str, "ticker symbol"],
+        self,
+        ticker,  # This is now a yf.Ticker object from the decorator
         save_path: Optional[str] = None,
     ) -> DataFrame:
         """Fetches and returns the latest dividends data as a DataFrame."""
-        ticker = symbol
         dividends = ticker.dividends
         if save_path:
             dividends.to_csv(save_path)
             print(f"Dividends for {ticker.ticker} saved to {save_path}")
         return dividends
 
-    def get_income_stmt(symbol: Annotated[str, "ticker symbol"]) -> DataFrame:
+    def get_income_stmt(self, ticker) -> DataFrame:
         """Fetches and returns the latest income statement of the company as a DataFrame."""
-        ticker = symbol
         income_stmt = ticker.financials
         return income_stmt
 
-    def get_balance_sheet(symbol: Annotated[str, "ticker symbol"]) -> DataFrame:
+    def get_balance_sheet(self, ticker) -> DataFrame:
         """Fetches and returns the latest balance sheet of the company as a DataFrame."""
-        ticker = symbol
         balance_sheet = ticker.balance_sheet
         return balance_sheet
 
-    def get_cash_flow(symbol: Annotated[str, "ticker symbol"]) -> DataFrame:
+    def get_cash_flow(self, ticker) -> DataFrame:
         """Fetches and returns the latest cash flow statement of the company as a DataFrame."""
-        ticker = symbol
         cash_flow = ticker.cashflow
         return cash_flow
 
-    def get_analyst_recommendations(symbol: Annotated[str, "ticker symbol"]) -> tuple:
+    def get_analyst_recommendations(self, ticker) -> tuple:
         """Fetches the latest analyst recommendations and returns the most common recommendation and its count."""
-        ticker = symbol
         recommendations = ticker.recommendations
         if recommendations.empty:
             return None, 0  # No recommendations available
@@ -115,3 +111,31 @@ class YFinanceUtils:
         majority_voting_result = row_0[row_0 == max_votes].index.tolist()
 
         return majority_voting_result[0], max_votes
+
+
+# Module-level functions for compatibility with DataSourceManager
+_utils_instance = YFinanceUtils()
+
+def get_stock_data(symbol: str, start_date: str, end_date: str) -> DataFrame:
+    """Module-level wrapper for YFinanceUtils.get_stock_data"""
+    return _utils_instance.get_stock_data(symbol, start_date, end_date)
+
+def get_company_info(symbol: str) -> DataFrame:
+    """Module-level wrapper for YFinanceUtils.get_company_info"""
+    return _utils_instance.get_company_info(symbol)
+
+def get_financial_data(symbol: str, report_type: str) -> DataFrame:
+    """Module-level wrapper for financial data (using income statement as default)"""
+    if report_type.lower() in ["annual", "yearly"]:
+        return _utils_instance.get_income_stmt(symbol)
+    else:
+        # For quarterly or other types, also return income statement
+        # This could be extended to handle different financial statement types
+        return _utils_instance.get_income_stmt(symbol)
+
+def get_company_news(symbol: str, start_date: str, end_date: str) -> list:
+    """Module-level wrapper for company news (placeholder implementation)"""
+    # Note: yfinance doesn't have a direct news API
+    # This is a placeholder that returns empty list
+    # In a real implementation, you might use a different news API
+    return []

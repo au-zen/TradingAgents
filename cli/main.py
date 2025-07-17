@@ -1,5 +1,8 @@
 from typing import Optional
 import datetime
+from dotenv import load_dotenv
+
+load_dotenv()
 import typer
 from pathlib import Path
 from functools import wraps
@@ -22,8 +25,10 @@ from rich.rule import Rule
 
 from tradingagents.graph.trading_graph import TradingAgentsGraph
 from tradingagents.default_config import DEFAULT_CONFIG
+from tradingagents.agents.utils.agent_utils import Toolkit
 from cli.models import AnalystType
 from cli.utils import *
+from cli.tools import get_tools
 
 console = Console()
 
@@ -191,7 +196,7 @@ def update_display(layout, spinner_text=None):
     layout["header"].update(
         Panel(
             "[bold green]Welcome to TradingAgents CLI[/bold green]\n"
-            "[dim]© [Tauric Research](https://github.com/TauricResearch)[/dim]",
+            "[dim] 2023 [Tauric Research](https://github.com/TauricResearch)[/dim]",
             title="Welcome to TradingAgents",
             border_style="green",
             padding=(1, 2),
@@ -731,9 +736,10 @@ def extract_content_string(content):
     else:
         return str(content)
 
-def run_analysis():
-    # First get all user selections
-    selections = get_user_selections()
+def run_analysis(selections=None, company_name=None):
+    # If selections are not provided, get them interactively
+    if selections is None:
+        selections = get_user_selections()
 
     # Create config with selected research depth
     config = DEFAULT_CONFIG.copy()
@@ -742,8 +748,8 @@ def run_analysis():
     config["quick_think_llm"] = selections["shallow_thinker"]
     config["deep_think_llm"] = selections["deep_thinker"]
     config["backend_url"] = selections["backend_url"]
-    config["llm_provider"] = selections["llm_provider"].lower()
-
+    # 提取提供商名称（去除描述文字）
+    config["llm_provider"] = selections["llm_provider"].lower().split()[0] if selections["llm_provider"] else ""
     # Initialize the graph
     graph = TradingAgentsGraph(
         [analyst.value for analyst in selections["analysts"]], config=config, debug=True
@@ -836,14 +842,22 @@ def run_analysis():
         update_display(layout, spinner_text)
 
         # Initialize state and get graph args
-        init_agent_state = graph.propagator.create_initial_state(
-            selections["ticker"], selections["analysis_date"]
+        # Handle both interactive and non-interactive date selections
+        start_date = selections.get("start_date", selections["analysis_date"])
+        end_date = selections.get("end_date", selections["analysis_date"])
+
+        initial_state = graph.propagator.create_initial_state(
+            company_name=selections["ticker"],  # Keep as ticker for backward compatibility
+            start_date=start_date,
+            end_date=end_date,
         )
+        # Add the actual company name to the state
+        initial_state["company_name"] = selections["company_name"]
         args = graph.propagator.get_graph_args()
 
         # Stream the analysis
         trace = []
-        for chunk in graph.graph.stream(init_agent_state, **args):
+        for chunk in graph.graph.stream(initial_state, **args):
             if len(chunk["messages"]) > 0:
                 # Get the last message from the chunk
                 last_message = chunk["messages"][-1]
@@ -1097,9 +1111,108 @@ def run_analysis():
 
 
 @app.command()
-def analyze():
-    run_analysis()
+def analyze(
+    ticker: Optional[str] = typer.Option(
+        None, "--ticker", "-t", help="Ticker symbol to analyze (e.g., 'SPY', '603127.SH')."
+    ),
+    start_date: Optional[str] = typer.Option(
+        None, "--start-date", "-s", help="Start date for analysis (YYYY-MM-DD)."
+    ),
+    end_date: Optional[str] = typer.Option(
+        None, "--end-date", "-e", help="End date for analysis (YYYY-MM-DD)."
+    ),
+    non_interactive: bool = typer.Option(
+        False, "--non-interactive", help="Run in non-interactive mode."
+    ),
+):
+    """
+    Run a comprehensive analysis of a given ticker symbol.
+    This command initiates a multi-agent workflow to perform detailed financial analysis.
+    """
+    selections = {}
+    if not non_interactive:
+        # Get all user selections before starting the analysis display.
+        selections = get_user_selections()
+    else:
+        # Use provided flags for non-interactive mode
+        if not all([ticker, start_date, end_date]):
+            console.print(
+                "[red]Error: --ticker, --start-date, and --end-date are required in non-interactive mode.[/red]"
+            )
+            raise typer.Exit(code=1)
+        selections = {
+            "analysts": [
+                AnalystType.MARKET,
+                AnalystType.NEWS,
+                AnalystType.SOCIAL,
+                AnalystType.FUNDAMENTALS,
+            ],  # Default analysts
+            "research_depth": 1,
+            "llm_provider": "openrouter",
+            "backend_url": "https://openrouter.ai/api/v1",
+            "shallow_thinker": "google/gemini-flash-1.5",
+            "deep_thinker": "google/gemini-flash-1.5",
+        }
 
+    # Get ticker and date if not provided in interactive mode
+    if 'ticker' not in selections:
+        selections['ticker'] = ticker if ticker else get_ticker()
+    
+    # Ensure start_date and end_date are set
+    if 'start_date' not in selections or 'end_date' not in selections:
+        # If dates were passed as flags, use them
+        if start_date and end_date:
+            selections['start_date'] = start_date
+            selections['end_date'] = end_date
+            selections['analysis_date'] = end_date
+        # Otherwise, use the date from the interactive selection
+        elif 'analysis_date' in selections:
+            selections['start_date'] = selections['analysis_date']
+            selections['end_date'] = selections['analysis_date']
+        # As a final fallback, prompt the user for dates
+        else:
+            selected_start_date, selected_end_date = get_analysis_date()
+            selections['start_date'] = selected_start_date
+            selections['end_date'] = selected_end_date
+            selections['analysis_date'] = selected_end_date
+
+    # Initialize Toolkit to get company name
+    toolkit = Toolkit(config=DEFAULT_CONFIG)
+    company_name = None
+    ticker = selections['ticker']
+    if toolkit.ticker_is_china_stock(ticker):
+        try:
+            info_str = toolkit.get_stock_individual_info.invoke({"ticker": ticker})
+            # 直接解析“公司名称:”行
+            lines = info_str.split('\n')
+            for line in lines:
+                if line.startswith("公司名称:"):
+                    company_name = line.replace("公司名称:", "").strip()
+                    break
+            if not company_name:
+                company_name = ticker  # fallback
+        except Exception as e:
+            console.print(f"Could not fetch company name for {ticker}: {e}")
+            company_name = ticker
+    else:
+        company_name = ticker
+    selections['company_name'] = company_name
+    selections['ticker'] = ticker
+
+    console.print(
+        Panel(
+            f"Analyzing [bold green]{company_name} ({ticker})[/bold green] from [bold cyan]{selections['start_date']}[/bold cyan] to [bold cyan]{selections['end_date']}[/bold cyan]",
+            title="[bold blue]Analysis Parameters[/bold blue]",
+            expand=False,
+        )
+    )
+
+    # Start the analysis
+    run_analysis(selections, company_name=company_name)
+
+
+def main():
+    app()
 
 if __name__ == "__main__":
-    app()
+    main()

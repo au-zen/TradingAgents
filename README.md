@@ -124,11 +124,48 @@ You will need the OpenAI API for all the agents.
 export OPENAI_API_KEY=$YOUR_OPENAI_API_KEY
 ```
 
+### Local Setup with Ollama (Optional)
+
+For local development and to avoid API costs, you can use Ollama to run models locally:
+
+1. **Install Ollama** (if not already installed):
+   ```bash
+   curl -fsSL https://ollama.ai/install.sh | sh
+   ```
+
+2. **Pull the required models**:
+   ```bash
+   # Pull LLM models for text generation
+   ollama pull llama3.1
+   ollama pull qwen3
+   
+   # Pull embedding model for semantic search
+   ollama pull nomic-embed-text:latest
+   ```
+
+3. **Start Ollama service**:
+   ```bash
+   ollama serve
+   ```
+
+4. **Configure TradingAgents to use Ollama**:
+   - In the CLI, select "Ollama" as your LLM provider
+   - The system will automatically use `nomic-embed-text:latest` for embeddings when Ollama is selected
+
+5. **Test your Ollama setup**:
+   ```bash
+   python test_ollama_embedding.py
+   ```
+   This script will verify that both Ollama and OpenAI embeddings are working correctly.
+
 ### CLI Usage
 
 You can also try out the CLI directly by running:
 ```bash
 python -m cli.main
+ python -m cli.main analyze --ticker 603127.SH --analysts fundamentals market news social_media
+ python -m typer cli/main.py --help
+ python -m typer cli/main.py run --ticker 603127.SH --start-date 2025-07-07 --end-date 2025-07-14 --non-interactive
 ```
 You will see a screen where you can select your desired tickers, date, LLMs, research depth, etc.
 
@@ -189,6 +226,16 @@ print(decision)
 ```
 
 > For `online_tools`, we recommend enabling them for experimentation, as they provide access to real-time data. The agents' offline tools rely on cached data from our **Tauric TradingDB**, a curated dataset we use for backtesting. We're currently in the process of refining this dataset, and we plan to release it soon alongside our upcoming projects. Stay tuned!
+
+### Embedding Models
+
+TradingAgents uses embedding models for semantic search and memory retrieval:
+
+- **OpenAI/OpenRouter**: Uses `text-embedding-ada-002` for compatibility
+- **Ollama (Local)**: Uses `nomic-embed-text:latest` for high-quality local embeddings
+- **Other providers**: Falls back to `text-embedding-ada-002`
+
+The embedding model is automatically selected based on your chosen LLM provider in the CLI.
 
 You can view the full list of configurations in `tradingagents/default_config.py`.
 

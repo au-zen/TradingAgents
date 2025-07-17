@@ -1,0 +1,28 @@
+2025-07-08 16:56:58,969 - INFO - Starting test selection process
+2025-07-08 16:56:58,969 - INFO - Getting stock code input
+2025-07-08 16:57:04,472 - INFO - Selected stock code: 603127.SH
+2025-07-08 16:57:04,472 - INFO - Getting analysis date
+2025-07-08 16:57:06,019 - INFO - Selected analysis date: 2025-07-08
+2025-07-08 16:57:06,019 - INFO - Selecting analysts
+2025-07-08 16:57:06,019 - INFO - Selected analysts: market, social, news, fundamentals
+2025-07-08 16:57:06,021 - INFO - Selecting research depth
+2025-07-08 16:57:06,021 - INFO - Selected research depth: Shallow - Quick research, few debate and strategy discussion rounds
+2025-07-08 16:57:06,021 - INFO - Selecting LLM provider
+2025-07-08 16:57:06,021 - INFO - Selected LLM provider: Openrouter with URL: https://openrouter.ai/api/v1
+2025-07-08 16:57:06,021 - INFO - Selecting AI models
+2025-07-08 16:57:06,022 - INFO - Selected models - Quick: DeepSeek V3 - 685B参数专家混合模型, Deep: DeepSeek V3 - 685B参数专家混合模型
+2025-07-08 16:57:06,022 - INFO - Final selections: {'ticker': '603127.SH', 'analysis_date': '2025-07-08', 'analysts': ['market', 'social', 'news', 'fundamentals'], 'research_depth': 'Shallow - Quick research, few debate and strategy discussion rounds', 'llm_provider': 'openrouter', 'backend_url': 'https://openrouter.ai/api/v1', 'shallow_thinker': 'DeepSeek V3 - 685B参数专家混合模型', 'deep_thinker': 'DeepSeek V3 - 685B参数专家混合模型'}
+2025-07-16 12:14:14,821 - INFO - Starting test selection process
+2025-07-16 12:14:14,821 - INFO - Getting stock code input
+2025-07-16 12:14:18,426 - INFO - Selected stock code: 603127.SH
+2025-07-16 12:14:18,426 - INFO - Getting analysis date
+2025-07-16 12:14:20,651 - INFO - Selected analysis date: 2025-07-16
+2025-07-16 12:14:20,651 - INFO - Selecting analysts
+2025-07-16 12:14:20,652 - INFO - Selected analysts: market, social, news, fundamentals
+2025-07-16 12:14:20,654 - INFO - Selecting research depth
+2025-07-16 12:14:20,654 - INFO - Selected research depth: Shallow - Quick research, few debate and strategy discussion rounds
+2025-07-16 12:14:20,654 - INFO - Selecting LLM provider
+2025-07-16 12:14:20,655 - INFO - Selected LLM provider: Openrouter with URL: https://openrouter.ai/api/v1
+2025-07-16 12:14:20,655 - INFO - Selecting AI models
+2025-07-16 12:14:20,656 - INFO - Selected models - Quick: DeepSeek V3 - 685B参数专家混合模型, Deep: DeepSeek V3 - 685B参数专家混合模型
+2025-07-16 12:14:20,656 - INFO - Final selections: {'ticker': '603127.SH', 'analysis_date': '2025-07-16', 'analysts': ['market', 'social', 'news', 'fundamentals'], 'research_depth': 'Shallow - Quick research, few debate and strategy discussion rounds', 'llm_provider': 'openrouter', 'backend_url': 'https://openrouter.ai/api/v1', 'shallow_thinker': 'DeepSeek V3 - 685B参数专家混合模型', 'deep_thinker': 'DeepSeek V3 - 685B参数专家混合模型'}
