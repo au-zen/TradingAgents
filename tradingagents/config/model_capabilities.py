@@ -122,20 +122,21 @@ MODEL_CAPABILITIES = {
     
     "ollama": {
         "tool_calling_models": [
-            "qwen3:14b",
-            "qwen3:8b",
-            "llama3.1:70b",
-            "llama3.1:8b",
-            "mistral:7b",
-            "codellama:13b",
+            "qwen3:latest",
+            "llama3.1:latest",
+            "llama3.2:latest",
+            "mistral:latest",
+            "deepseek-coder-v2:latest",
+            "deepseek-r1:latest",
         ],
         "non_tool_calling_models": [
-            "llama2:7b",
+            "llama2:latest",
+            "codellama:latest",
         ],
         "recommended_configs": {
             "production": {
-                "deep_think_llm": "qwen3:14b",
-                "quick_think_llm": "qwen3:8b"
+                "deep_think_llm": "qwen3:latest",
+                "quick_think_llm": "llama3.1:latest"
             }
         }
     }
@@ -214,9 +215,11 @@ FREE_TOOL_CALLING_MODELS = {
         "gemini-1.5-pro",  # 有免费额度
     ],
     "ollama": [
-        "qwen3:14b",
-        "qwen3:8b",
-        "llama3.1:8b",
+        "qwen3:latest",
+        "llama3.1:latest",
+        "llama3.2:latest",
+        "mistral:latest",
+        "deepseek-r1:latest",
     ]
 }
 
