@@ -172,6 +172,11 @@ def select_shallow_thinking_agent(provider) -> str:
             ("llama3.1:latest (local, 8B, general)", "llama3.1:latest"),
             ("mistral:latest (local, 7B, efficient)", "mistral:latest"),
             ("llama2:latest (local, 7B, legacy)", "llama2:latest"),
+        ],
+        "zhipuai": [
+            ("GLM-4-Flash (免费, 支持工具调用)", "glm-4-flash"),
+            ("GLM-Z1-Flash (免费, 支持工具调用)", "glm-z1-flash"),
+            ("GLM-4-Air (付费, 支持工具调用)", "glm-4-air"),
         ]
     }
 
@@ -256,6 +261,12 @@ def select_deep_thinking_agent(provider) -> str:
             ("llama3.2:latest (local, 3.2B, compact)", "llama3.2:latest"),
             ("mistral:latest (local, 7B, efficient)", "mistral:latest"),
             ("deepseek-coder-v2:latest (local, 15.7B, code)", "deepseek-coder-v2:latest"),
+        ],
+        "zhipuai": [
+            ("GLM-Z1-Flash (免费, 支持工具调用)", "glm-z1-flash"),
+            ("GLM-4-Plus (付费, 支持工具调用)", "glm-4-plus"),
+            ("GLM-4-Air (付费, 支持工具调用)", "glm-4-air"),
+            ("GLM-4-Long (付费, 长文本)", "glm-4-long"),
         ]
     }
     
@@ -293,6 +304,7 @@ def select_llm_provider() -> tuple[str, str]:
         ("Openrouter (推荐, 免费额度大)", "https://openrouter.ai/api/v1"),
         ("Groq (高速, 免费)", "https://api.groq.com/openai/v1"),
         ("Together AI (开源模型丰富)", "https://api.together.xyz/v1"),
+        ("智谱AI (中文优化, 免费)", "https://open.bigmodel.cn/api/paas/v4"),
         ("Ollama (本地, 完全免费)", "http://localhost:11434/v1"),
     ]
     

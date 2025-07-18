@@ -28,6 +28,7 @@ DEFAULT_CONFIG = {
     "together_api_key": os.getenv("TOGETHER_API_KEY"),
     "huggingface_api_key": os.getenv("HUGGINGFACE_API_KEY"),
     "google_api_key": os.getenv("GOOGLE_API_KEY"),
+    "zhipuai_api_key": os.getenv("ZHIPUAI_API_KEY"),
 
     # API Endpoints
     "api_endpoints": {
@@ -35,7 +36,8 @@ DEFAULT_CONFIG = {
         "groq": "https://api.groq.com/openai/v1",
         "together": "https://api.together.xyz/v1",
         "huggingface": "https://api-inference.huggingface.co",
-        "google": "https://generativelanguage.googleapis.com/v1beta"
+        "google": "https://generativelanguage.googleapis.com/v1beta",
+        "zhipuai": "https://open.bigmodel.cn/api/paas/v4"
     },
 
     # =============================================================================
@@ -99,6 +101,16 @@ DEFAULT_CONFIG = {
             "recommended": {
                 "deep_think": "gemini-1.5-pro",
                 "quick_think": "gemini-1.5-flash"
+            }
+        },
+        "zhipuai": {
+            "free_models": [
+                "glm-z1-flash",
+                "glm-4-flash"
+            ],
+            "recommended": {
+                "deep_think": "glm-z1-flash",
+                "quick_think": "glm-4-flash"
             }
         }
     },

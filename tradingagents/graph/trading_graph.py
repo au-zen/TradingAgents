@@ -116,6 +116,18 @@ class TradingAgentsGraph:
                 model=self.config["quick_think_llm"],
                 google_api_key=self.config["google_api_key"]
             )
+        elif provider_name == "智谱ai" or provider_name == "zhipuai":
+            # 智谱AI使用OpenAI兼容的API
+            self.deep_thinking_llm = ChatOpenAI(
+                model=self.config["deep_think_llm"],
+                base_url=self.config["api_endpoints"]["zhipuai"],
+                api_key=self.config["zhipuai_api_key"]
+            )
+            self.quick_thinking_llm = ChatOpenAI(
+                model=self.config["quick_think_llm"],
+                base_url=self.config["api_endpoints"]["zhipuai"],
+                api_key=self.config["zhipuai_api_key"]
+            )
         else:
             raise ValueError(f"Unsupported LLM provider: {provider_name} (from: {self.config['llm_provider']})")
         

@@ -139,6 +139,34 @@ MODEL_CAPABILITIES = {
                 "quick_think_llm": "llama3.1:latest"
             }
         }
+    },
+
+    "zhipuai": {
+        "tool_calling_models": [
+            "glm-4-flash",
+            "glm-4-plus",
+            "glm-4-air",
+            "glm-4-airx",
+            "glm-4-long",
+            "glm-z1-flash",
+        ],
+        "non_tool_calling_models": [
+            "glm-3-turbo",
+        ],
+        "recommended_configs": {
+            "production": {
+                "deep_think_llm": "glm-4-plus",
+                "quick_think_llm": "glm-4-flash"
+            },
+            "free": {
+                "deep_think_llm": "glm-z1-flash",
+                "quick_think_llm": "glm-4-flash"
+            },
+            "development": {
+                "deep_think_llm": "glm-4-air",
+                "quick_think_llm": "glm-4-flash"
+            }
+        }
     }
 }
 
@@ -220,6 +248,10 @@ FREE_TOOL_CALLING_MODELS = {
         "llama3.2:latest",
         "mistral:latest",
         "deepseek-r1:latest",
+    ],
+    "zhipuai": [
+        "glm-z1-flash",
+        "glm-4-flash",
     ]
 }
 
